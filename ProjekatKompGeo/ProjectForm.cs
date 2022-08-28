@@ -48,11 +48,16 @@ namespace ProjekatKompGeo
                 if (pocetakKraj.Count < 2)
                 {
                     Vektor2D tacka = new Vektor2D(e.X, e.Y);
-                    pocetakKraj.Add(tacka);
                     if (pocetakKraj.Count == 0)
+                    {
                         tacka.DrawVektor(g, new SolidBrush(Color.Green), 10);
+                        pocetakKraj.Add(tacka);
+                    }
                     else
+                    {
                         tacka.DrawVektor(g, new SolidBrush(Color.Violet), 10);
+                        pocetakKraj.Add(tacka);
+                    }
                 }
             }
         }
@@ -75,12 +80,20 @@ namespace ProjekatKompGeo
         private void trapezDekom_Click(object sender, EventArgs e)
         {
             Size dimenzija = screenPanel.Size;
-            HelperFunkcije.TrapezoidnaDekompozicija(dimenzija, prepreke, g, ref mapaPuteva);
+            Dictionary<string, bool> postavke = new Dictionary<string, bool>();
+            postavke["vrhovi"] = vrhoviBox.Checked;
+            postavke["grane"] = graneBox.Checked;
+
+            HelperFunkcije.TrapezoidnaDekompozicija(dimenzija, prepreke, g, ref mapaPuteva, postavke);
         }
 
         private void grafVidButton_Click(object sender, EventArgs e)
         {
-            HelperFunkcije.GrafVidljivosti(prepreke, g, ref mapaPuteva);
+            Dictionary<string, bool> postavke = new Dictionary<string, bool>();
+            postavke["vrhovi"] = vrhoviBox.Checked;
+            postavke["grane"] = graneBox.Checked;
+
+            HelperFunkcije.GrafVidljivosti(prepreke, g, ref mapaPuteva, postavke);
         }
 
         private void quadtreeButton_Click(object sender, EventArgs e)
@@ -96,36 +109,26 @@ namespace ProjekatKompGeo
 
         private void nadjiPut_click(object sender, EventArgs e)
         {
-            if (mapaPuteva == null)
+            if (mapaPuteva == null || pocetakKraj.Count == 0)
                 return;
 
             if (bfsButton.Checked)
             {
-                // mapePuteva.printGrane();
                 List<Vektor2D> sortiraneEkstenzijeTacke = mapaPuteva.SortiraneTackePuteva;
-                
-                List<int> BFSput = mapaPuteva.BFS(sortiraneEkstenzijeTacke[0], sortiraneEkstenzijeTacke[sortiraneEkstenzijeTacke.Count - 1], g);
-                /*
-                for (int i = 0; i < BFSput.Count - 1; i++)
-                {
-                     Segment segmentPuta = new Segment(sortiraneEkstenzijeTacke[BFSput[i]], sortiraneEkstenzijeTacke[BFSput[i + 1]]);
-                     segmentPuta.DrawSegment(g, Color.Chocolate);
-                }
-                */
+                mapaPuteva.BFS(pocetakKraj[0], pocetakKraj[1], g);
                 return;
             }
 
             if (dfsButton.Checked)
             {
                 List<Vektor2D> sortiraneEkstenzijeTacke = mapaPuteva.SortiraneTackePuteva;
-                List<int> DFSput = mapaPuteva.DFS(sortiraneEkstenzijeTacke[0], sortiraneEkstenzijeTacke[sortiraneEkstenzijeTacke.Count - 1], g);
-                /*
-                for (int i = 0; i < DFSput.Count - 1; i++)
-                {
-                    Segment segmentPuta = new Segment(sortiraneEkstenzijeTacke[DFSput[i]], sortiraneEkstenzijeTacke[DFSput[i + 1]]);
-                    segmentPuta.DrawSegment(g, Color.DarkGreen);
-                }
-                */
+                mapaPuteva.DFS(pocetakKraj[0], pocetakKraj[1], g);
+                return;
+            }
+             
+            if (djikstraRadio.Checked)
+            {
+                mapaPuteva.DJIKSTRA(pocetakKraj[0], pocetakKraj[1], g);
                 return;
             }
 

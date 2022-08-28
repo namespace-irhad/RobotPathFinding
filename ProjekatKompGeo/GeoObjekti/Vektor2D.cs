@@ -11,6 +11,7 @@ namespace ProjekatKompGeo.GeoObjekti
     {
         PointF koordinate;
         int vrijednost;
+        private int velicina;
 
         public Vektor2D(float x, float y)
         {
@@ -31,6 +32,11 @@ namespace ProjekatKompGeo.GeoObjekti
             this.vrijednost = vrijednost;
         }
 
+        public Vektor2D(int velicina)
+        {
+            this.velicina = velicina;
+        }
+
         public float X { get { return koordinate.X; } }
         public float Y { get { return koordinate.Y; } }
 
@@ -40,6 +46,7 @@ namespace ProjekatKompGeo.GeoObjekti
         {
             vrijednost = v;
         }
+
         public void DrawVektor(Graphics g)
         {
             g.FillRectangle(Brushes.Red, this.koordinate.X, this.koordinate.Y, 5, 5);
@@ -57,7 +64,15 @@ namespace ProjekatKompGeo.GeoObjekti
             return new PointF(koordinate.X, koordinate.Y);
         }
         public static double getUdaljenost(Vektor2D A, Vektor2D B) {
+            if (A == null | B == null) return double.MaxValue;
             return Math.Sqrt(Math.Pow((B.X - A.X), 2) + Math.Pow((B.Y - A.Y), 2));
-        } 
+        }
+        public bool Isti(Vektor2D B)
+        {
+            Vektor2D A = this;
+            if (A.X == B.X && A.Y == B.Y)
+                return true;
+            return false;
+        }
     }
 }

@@ -25,7 +25,7 @@ namespace ProjekatKompGeo.GeoObjekti
         public Graf(int velicina)
         {
             this.velicina = velicina;
-            Node = new List<Vektor2D>(velicina);
+            Node = new List<Vektor2D>( new Vektor2D[velicina] );
             NeighborList = Enumerable.Range(0, velicina).Select(c => new List<Vektor2D>(velicina)).ToList();
         }
 
@@ -34,11 +34,14 @@ namespace ProjekatKompGeo.GeoObjekti
             if (from == to)
                 return;
 
-            if (!Node.Contains(from))
-                Node.Add(from);
+            if (Node[from.V] == null)
+                Node[from.V] = from;
+
+            if (Node[to.V] == null)
+                Node[to.V] = to;
 
             NeighborList[from.V].Add(to);
-            // NeighborList[to.V].Add(from);
+            NeighborList[to.V].Add(from);
         }
         public bool HasEdge(Vektor2D from, Vektor2D to)
         {
@@ -61,8 +64,55 @@ namespace ProjekatKompGeo.GeoObjekti
             }
         }
 
-        public List<int> BFS(Vektor2D start, Vektor2D kraj, Graphics g)
+        // private Vektor2D VratiIzListe(int V) {
+
+        // }
+
+        private Tuple<Vektor2D, Vektor2D> UbaciPocetakKraj(Vektor2D pocetak, Vektor2D kraj, Graphics g, Color color) {
+            Vektor2D najkraci = null;
+            double najkracaUdaljenost = double.MaxValue;
+            Tuple<Vektor2D, Vektor2D> rez = new Tuple<Vektor2D, Vektor2D>(null, null); 
+
+            for (int i = 0; i < velicina; i++)
+            {
+                if (najkracaUdaljenost > Vektor2D.getUdaljenost(pocetak, Node[i])) {
+                    najkracaUdaljenost = Vektor2D.getUdaljenost(pocetak, Node[i]);
+                    najkraci = Node[i];
+                }
+            }
+            if (najkraci != null) {
+                new Segment(pocetak, najkraci).DrawSegment(g, color);
+                rez = Tuple.Create(najkraci, rez.Item2);
+            }
+
+            najkraci = null;
+            najkracaUdaljenost = int.MaxValue;
+            for (int i = 0; i < velicina; i++)
+            {
+                if (najkracaUdaljenost > Vektor2D.getUdaljenost(Node[i], kraj))
+                {
+                    najkracaUdaljenost = Vektor2D.getUdaljenost(Node[i], kraj);
+                    najkraci = Node[i];
+                }
+            }
+
+            if (najkraci != null)
+            {
+                new Segment(najkraci, kraj).DrawSegment(g, color);
+                rez = Tuple.Create(rez.Item1, najkraci);
+            }
+
+            return rez;
+        }
+
+        public void BFS(Vektor2D start, Vektor2D kraj, Graphics g)
         {
+            var novo = UbaciPocetakKraj(start, kraj, g, Color.Blue);
+            start = novo.Item1;
+            kraj = novo.Item2;
+
+            // printGrane();
+
             Dictionary<int, Tuple<int, Vektor2D>> prethodni = new Dictionary<int, Tuple<int, Vektor2D>>();
 
             Queue<Vektor2D> queue = new Queue<Vektor2D>();
@@ -83,70 +133,136 @@ namespace ProjekatKompGeo.GeoObjekti
 
             var path = new List<Tuple<int, Vektor2D>> { };
 
-            var current = kraj.V;
-            while (!current.Equals(start.V))
+            int trenutni = kraj.V;
+            Vektor2D trenutniCvor = kraj;
+            while (!trenutni.Equals(start.V))
             {
-                path.Add(new Tuple<int, Vektor2D>(current, prethodni[current].Item2));
-                current = prethodni[current].Item1;
+                path.Add(new Tuple<int, Vektor2D>(trenutni, trenutniCvor));
+                trenutni = prethodni[trenutni].Item1;
+                trenutniCvor = prethodni[trenutni].Item2;
             };
 
             path.Add(new Tuple<int, Vektor2D>(start.V, start));
             path.Reverse();
 
+            path.ToList().Take(10).ToList().ForEach(p => Debug.Write(p.Item1 + " "));
+
 
             for (int i = 0; i < path.Count - 1; i++)
             {
-                // Draw line
-                Segment s = new Segment(path[i].Item2, path[i + 1].Item2);
-                s.DrawSegment(g, Color.Red);
+                // Crtaj
+                Segment s = new Segment(Node[path[i].Item1], Node[path[i+1].Item1]);
+                s.DrawSegment(g, Color.Blue);
             }
-            return new List<int> { };
         }
 
-        public List<int> DFS(Vektor2D start, Vektor2D kraj, Graphics g)
+
+        public void DFS(Vektor2D start, Vektor2D kraj, Graphics g)
         {
-            if (start.V == kraj.V)
-                return new List<int> { start.V };
+            var novo = UbaciPocetakKraj(start, kraj, g, Color.Red);
+            start = novo.Item1;
+            kraj = novo.Item2;
+            
+            List<bool> posjeceni = new List<bool>(new bool[velicina]);
+            Stack<Vektor2D> stack = new Stack<Vektor2D>();
+            stack.Push(start);
 
-            List<bool> visited = new List<bool>(velicina);
-            for (int i = 0; i < velicina; i++)
-                visited.Add(false);
-
-            Stack<int> stack = new Stack<int>();
-            stack.Push(start.V);
-
-            List<Tuple<int, Vektor2D>> path = new List<Tuple<int, Vektor2D>> { };
+            Dictionary<int, Tuple<int, Vektor2D>> prethodni = new Dictionary<int, Tuple<int, Vektor2D>>();
 
             while (stack.Count > 0)
             {
                 var vertex = stack.Pop();
-                visited[vertex] = true;
-                path.Add(new Tuple<int, Vektor2D>(vertex, Node[vertex]));
+                if (posjeceni[vertex.V])
+                    continue;
 
-                foreach (Vektor2D neighbor in NeighborList[vertex])
+                posjeceni[vertex.V] = true;
+                foreach (Vektor2D neighbor in NeighborList[vertex.V])
                 {
-                    if (neighbor.V == kraj.V)
-                    {
-                        path.Add(new Tuple<int, Vektor2D>(neighbor.V, neighbor));
-                        path.Add(new Tuple<int, Vektor2D>(vertex, Node[vertex]));
-                        return new List<int> { };
-                    }
+                    if (prethodni.ContainsKey(neighbor.V))
+                        continue;
 
-                    if (!visited[neighbor.V])
-                        stack.Push(neighbor.V);
+                    prethodni[neighbor.V] = new Tuple<int, Vektor2D>(vertex.V, vertex);
+                    stack.Push(neighbor);
                 }
-
             }
 
+            var path = new List<Tuple<int, Vektor2D>> { };
+
+            int trenutni = kraj.V;
+            Vektor2D trenutniCvor = kraj;
+            while (!trenutni.Equals(start.V))
+            {
+                path.Add(new Tuple<int, Vektor2D>(trenutni, trenutniCvor));
+                trenutni = prethodni[trenutni].Item1;
+                trenutniCvor = prethodni[trenutni].Item2;
+            };
+
+            path.Add(new Tuple<int, Vektor2D>(start.V, start));
+            path.Reverse();
+
+            path.ToList().ForEach(p => Debug.Write(p.Item1 + " "));
             for (int i = 0; i < path.Count - 1; i++)
             {
                 // Draw line
-                Segment s = new Segment(path[i].Item2, path[i + 1].Item2);
+                Segment s = new Segment(Node[path[i].Item1], Node[path[i + 1].Item1]);
                 s.DrawSegment(g, Color.Red);
             }
 
-            return new List<int> { };
         }
 
+        public void DJIKSTRA(Vektor2D start, Vektor2D kraj, Graphics g) {
+            // Djikstra's algorithm using distance of points
+            var novo = UbaciPocetakKraj(start, kraj, g, Color.Green);
+            start = novo.Item1;
+            kraj = novo.Item2;
+            int startV = start.V;
+            int krajV = kraj.V;
+            int[] dist = new int[velicina];
+            int[] prethodni = new int[velicina];
+
+            for (int i = 0; i < velicina; i++)
+            {
+                dist[i] = int.MaxValue;
+                prethodni[i] = -1;
+            }
+
+            dist[startV] = 0;
+            List<int> Q = new List<int>();
+            Q.Add(startV);
+
+            while (Q.Count > 0)
+            {
+                int u = Q[0];
+                Q.RemoveAt(0);
+                foreach (Vektor2D v in NeighborList[u])
+                {
+                    if (dist[v.V] > dist[u] + Vektor2D.getUdaljenost(Node[u], Node[v.V]))
+                    {
+                        dist[v.V] = dist[u] + (int)Vektor2D.getUdaljenost(Node[u], Node[v.V]);
+                        prethodni[v.V] = u;
+                        if (!Q.Contains(v.V))
+                            Q.Add(v.V);
+                    }
+                }
+            }
+            // Print path
+            List<int> path = new List<int>();
+            int trenutni = krajV;
+            while (!trenutni.Equals(startV))
+            {
+                path.Add(trenutni);
+                trenutni = prethodni[trenutni];
+            }
+            path.Add(startV);
+            path.Reverse();
+           // path.ForEach(p => Debug.Write(p + " "));
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                // Draw line
+                Segment s = new Segment(Node[path[i]], Node[path[i + 1]]);
+                s.DrawSegment(g, Color.Green);
+            }
+
+        }
     }
 }

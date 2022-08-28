@@ -11,7 +11,7 @@ namespace ProjekatKompGeo.GeoObjekti
     internal class HelperFunkcije
     {
         public static Graphics gr;
-        public static void TrapezoidnaDekompozicija(Size dimenzija, List<Poligon> prepreke, Graphics g, ref Graf mapaPuteva)
+        public static void TrapezoidnaDekompozicija(Size dimenzija, List<Poligon> prepreke, Graphics g, ref Graf mapaPuteva, Dictionary<string, bool> postavke)
         {
             Brush brush = new SolidBrush(Color.Blue);
             List<Tuple<Segment, Vektor2D, int>> ekstenzije = new List<Tuple<Segment, Vektor2D, int>>();
@@ -57,7 +57,7 @@ namespace ProjekatKompGeo.GeoObjekti
                     }
                     if (tackaUdaljenosti != null && brojPresijeka % 2 == 0)
                     {
-                        tackaUdaljenosti.DrawVektor(g, new SolidBrush(Color.Yellow));
+                        // tackaUdaljenosti.DrawVektor(g, new SolidBrush(Color.Yellow));
                         Segment segment = new Segment(tackaUdaljenosti, tackaOd);
                         trapezSegmenti.Add(segment);
                         // segment.DrawSegment(g);
@@ -84,13 +84,14 @@ namespace ProjekatKompGeo.GeoObjekti
             }
 
             // Pronadji srednje tacke svakog segmenta
-            Font font1 = new Font("Arial", 12, FontStyle.Bold, GraphicsUnit.Point);
+            Font font1 = new Font("Arial", 9, FontStyle.Regular, GraphicsUnit.Point);
             for (int i = 0; i < trapezSegmenti.Count; i++)
             {
                 Segment segment = trapezSegmenti[i];
                 float srednjeY = Math.Abs(Math.Max(segment.Poc.Y, segment.Kraj.Y)) + Math.Abs(Math.Min(segment.Poc.Y, segment.Kraj.Y));
                 Vektor2D srednjaTacka = new Vektor2D(segment.Poc.X, srednjeY / 2);
-                srednjaTacka.DrawVektor(g, new SolidBrush(Color.Pink));
+                if (postavke["vrhovi"])
+                    srednjaTacka.DrawVektor(g, new SolidBrush(Color.Pink));
                 tackeEkstenzija.Add(srednjaTacka);
             }
             // TODO: pogledati bolji nacin (ovo je naivna provjera za pronalazenje grana)
@@ -100,7 +101,8 @@ namespace ProjekatKompGeo.GeoObjekti
             {
                 tacka.SetV(index);
                 index++;
-                g.DrawString(tacka.V.ToString(), font1, brush, tacka.getPoint());
+                if (postavke["vrhovi"])
+                    g.DrawString(tacka.V.ToString(), font1, brush, tacka.getPoint());
             }
 
             // Dodaj pocetnu tacku
@@ -111,7 +113,12 @@ namespace ProjekatKompGeo.GeoObjekti
                 midTackaY = dimenzija.Height / 2;
             }
             Vektor2D pocetnaTacka = new Vektor2D(0, midTackaX, midTackaY);
-            pocetnaTacka.DrawVektor(g, new SolidBrush(Color.Pink));
+            if (postavke["vrhovi"])
+            {
+                pocetnaTacka.DrawVektor(g, new SolidBrush(Color.Pink));
+                g.DrawString(pocetnaTacka.V.ToString(), font1, brush, pocetnaTacka.getPoint());
+
+            }
             sortiraneEkstenzijeTacke.Insert(0, pocetnaTacka);
 
             // Dodaj krajnju tacku
@@ -123,7 +130,12 @@ namespace ProjekatKompGeo.GeoObjekti
                 midTacka2Y = dimenzija.Height / 2;
             }
             Vektor2D pocetnaTacka2 = new Vektor2D(sortiraneEkstenzijeTacke.Count, midTacka2X, midTacka2Y);
-            pocetnaTacka2.DrawVektor(g, new SolidBrush(Color.Pink));
+            if (postavke["vrhovi"])
+            {
+
+                pocetnaTacka2.DrawVektor(g, new SolidBrush(Color.Pink));
+                g.DrawString(pocetnaTacka2.V.ToString(), font1, brush, pocetnaTacka2.getPoint());
+            }
             sortiraneEkstenzijeTacke.Add(pocetnaTacka2);
             mapaPuteva = new Graf(sortiraneEkstenzijeTacke.Count);
             mapaPuteva.SortiraneTackePuteva = sortiraneEkstenzijeTacke;
@@ -144,7 +156,8 @@ namespace ProjekatKompGeo.GeoObjekti
                     }
                     if (!sijeku)
                     {
-                        // potencijalnaGrana.DrawSegment(g);
+                        if (postavke["grane"])
+                            potencijalnaGrana.DrawSegment(g);
                         mapaPuteva.AddEdge(potencijalnaGrana.Poc, potencijalnaGrana.Kraj);
                         if (k != sortiraneEkstenzijeTacke.Count - 1 && Math.Abs(sortiraneEkstenzijeTacke[k].X - sortiraneEkstenzijeTacke[k + 1].X) < 1)
                         {
@@ -160,8 +173,9 @@ namespace ProjekatKompGeo.GeoObjekti
                             }
                             if (!sijeku2)
                             {
-                                // dodatniSegment.DrawSegment(g);
-                                mapaPuteva.AddEdge(dodatniSegment.Poc, dodatniSegment.Kraj);
+                                if (postavke["grane"])
+                                    dodatniSegment.DrawSegment(g);
+                                    mapaPuteva.AddEdge(dodatniSegment.Poc, dodatniSegment.Kraj);
                             }
                         }
                         break;
@@ -170,13 +184,63 @@ namespace ProjekatKompGeo.GeoObjekti
             }
         }
 
-        public static void GrafVidljivosti(List<Poligon> prepreke, Graphics g, ref Graf mapaPuteva)
+        public static void GrafVidljivosti(List<Poligon> prepreke, Graphics g, ref Graf mapaPuteva, Dictionary<string, bool> postavke)
         {
             int brojTacaka = 0;
             for (int i = 0; i < prepreke.Count; i++)
                 brojTacaka += prepreke[i].getTacke().Count;
 
+            List<Vektor2D> tacke = new List<Vektor2D>();
+            for (int i = 0; i < prepreke.Count; i++)
+            {
+                for (int j = 0; j < prepreke[i].getTacke().Count; j++)
+                {
+                    tacke.Add(prepreke[i].getTacke()[j]);
+                }
+            }
+
+            List<Vektor2D> sortiraneTacke = tacke.OrderBy(i => i.X).ToList();
+            Font font1 = new Font("Arial", 9, FontStyle.Regular, GraphicsUnit.Point);
+            int index = 0;
+            foreach (Vektor2D tacka in sortiraneTacke)
+            {
+                tacka.SetV(index);
+                if (postavke["vrhovi"])
+                    g.DrawString(tacka.V.ToString(), font1, new SolidBrush(Color.Green), tacka.getPoint());
+
+                // Postaviti labelu za vrhove segmenta
+                for (int i = 0; i < prepreke.Count; i++)
+                {
+                    for (int j = 0; j < prepreke[i].getSegmenti().Count; j++)
+                    {
+                        if (prepreke[i].getSegmenti()[j].Poc.Isti(tacka))
+                        {
+                            prepreke[i].getSegmenti()[j].Poc.SetV(index);
+                        }
+                        if (prepreke[i].getSegmenti()[j].Kraj.Isti(tacka))
+                        {
+                            prepreke[i].getSegmenti()[j].Kraj.SetV(index);
+                        }
+                    }
+                }
+                index++;
+            }
+
             mapaPuteva = new Graf(brojTacaka);
+
+            // Dodati susjedne grane u graf
+            for (int i = 0; i < prepreke.Count; i++)
+            {
+                Poligon poligonA = prepreke[i];
+                for (int j = 0; j < poligonA.getSegmenti().Count; j++)
+                {
+                    Segment segmentA = poligonA.getSegmenti()[j];
+                    mapaPuteva.AddEdge(segmentA.Poc, segmentA.Kraj);
+                }
+            }
+
+
+
             for (int i = 0; i < prepreke.Count; i++)
             {
                 Poligon poligonA = prepreke[i];
@@ -185,7 +249,7 @@ namespace ProjekatKompGeo.GeoObjekti
                     Vektor2D tackaA = prepreke[i].getTacke()[k];
                     for (int j = i + 1; j < prepreke.Count; j++)
                     {
-                        
+
                         Poligon poligonB = prepreke[j];
                         for (int l = 0; l < prepreke[j].getTacke().Count; l++)
                         {
@@ -202,7 +266,8 @@ namespace ProjekatKompGeo.GeoObjekti
                             }
                             if (!presjek)
                             {
-                                segment.DrawSegment(g, Color.Blue);
+                                if (postavke["grane"])
+                                    segment.DrawSegment(g, Color.Blue);
                                 mapaPuteva.AddEdge(segment.Poc, segment.Kraj);
                             }
                         }
@@ -210,18 +275,19 @@ namespace ProjekatKompGeo.GeoObjekti
                 }
             }
         }
-    
+
 
 
         public static int ProvjeriCeliju(List<Vektor2D> celija, List<Poligon> prepreke)
         {
-            List<Segment> granice = new List<Segment> { 
-                new Segment(celija[0], celija[1]), new Segment(celija[1], celija[2]), 
+            List<Segment> granice = new List<Segment> {
+                new Segment(celija[0], celija[1]), new Segment(celija[1], celija[2]),
                 new Segment(celija[2], celija[3]), new Segment(celija[3], celija[0]), };
-            
+
 
             Poligon polya = new Poligon(granice);
-            foreach (Poligon obs in prepreke) {
+            foreach (Poligon obs in prepreke)
+            {
                 Poligon polyb = obs;
                 if (polyb.SadrziPoligon(polya))
                     return 1;
@@ -257,7 +323,7 @@ namespace ProjekatKompGeo.GeoObjekti
             Stack<List<Vektor2D>> celije = new Stack<List<Vektor2D>>();
             celije.Push(regija);
 
-            while(celije.Count > 0)
+            while (celije.Count > 0)
             {
                 regija = celije.Pop();
                 Vektor2D v0 = regija[0];
@@ -273,7 +339,7 @@ namespace ProjekatKompGeo.GeoObjekti
                     List<Vektor2D> celija0 = new List<Vektor2D>{
                         new Vektor2D(v0.X, v0.Y), new Vektor2D(v0.X, (v1.Y + v0.Y) / 2),
                         new Vektor2D((v3.X + v0.X) / 2, (v1.Y + v0.Y) / 2), new Vektor2D((v3.X + v0.X) / 2, v0.Y) };
-                    Debug.WriteLine(ProvjeriCeliju(celija0, prepreke));
+                    // Debug.WriteLine(ProvjeriCeliju(celija0, prepreke));
                     if (ProvjeriCeliju(celija0, prepreke) == 0)
                         celije.Push(celija0);
                     List<Vektor2D> celija1 = new List<Vektor2D>{

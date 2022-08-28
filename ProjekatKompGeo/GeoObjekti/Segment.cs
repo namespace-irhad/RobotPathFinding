@@ -31,6 +31,11 @@ namespace ProjekatKompGeo.GeoObjekti
             g.DrawLine(pen, new PointF(poc.X, poc.Y), new PointF(kraj.X, kraj.Y));
         }
 
+        public bool Isti(Segment B)
+        {
+            return B.poc.Isti(this.poc) && B.kraj.Isti(this.kraj);
+        }
+
         public static bool CCW(Vektor2D A, Vektor2D B, Vektor2D C)
         {
             return (C.Y - A.Y) * (B.X - A.X) > (B.Y - A.Y) * (C.X - A.X);

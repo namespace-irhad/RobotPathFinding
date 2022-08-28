@@ -31,6 +31,10 @@
             this.screenPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.graneBox = new System.Windows.Forms.CheckBox();
+            this.vrhoviBox = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.destRadio = new System.Windows.Forms.RadioButton();
             this.velicinaNo = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
@@ -49,8 +53,11 @@
             this.generisiPoligone = new System.Windows.Forms.Button();
             this.dodajLabel = new System.Windows.Forms.Label();
             this.poligonRadio = new System.Windows.Forms.RadioButton();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.djikstraRadio = new System.Windows.Forms.RadioButton();
             this.screenPanel.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.velicinaNo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.generisiNo)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -81,6 +88,7 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.panel2.Controls.Add(this.groupBox3);
             this.panel2.Controls.Add(this.destRadio);
             this.panel2.Controls.Add(this.velicinaNo);
             this.panel2.Controls.Add(this.label4);
@@ -95,6 +103,51 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(259, 628);
             this.panel2.TabIndex = 1;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.groupBox3.Controls.Add(this.graneBox);
+            this.groupBox3.Controls.Add(this.vrhoviBox);
+            this.groupBox3.Controls.Add(this.label5);
+            this.groupBox3.Location = new System.Drawing.Point(134, 154);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(114, 117);
+            this.groupBox3.TabIndex = 19;
+            this.groupBox3.TabStop = false;
+            // 
+            // graneBox
+            // 
+            this.graneBox.AutoSize = true;
+            this.graneBox.Location = new System.Drawing.Point(7, 54);
+            this.graneBox.Name = "graneBox";
+            this.graneBox.Size = new System.Drawing.Size(55, 17);
+            this.graneBox.TabIndex = 13;
+            this.graneBox.Text = "Grane";
+            this.graneBox.UseVisualStyleBackColor = true;
+            // 
+            // vrhoviBox
+            // 
+            this.vrhoviBox.AutoSize = true;
+            this.vrhoviBox.Checked = true;
+            this.vrhoviBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.vrhoviBox.Location = new System.Drawing.Point(7, 31);
+            this.vrhoviBox.Name = "vrhoviBox";
+            this.vrhoviBox.Size = new System.Drawing.Size(56, 17);
+            this.vrhoviBox.TabIndex = 12;
+            this.vrhoviBox.Text = "Vrhovi";
+            this.vrhoviBox.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            this.label5.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(0, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(114, 27);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "Crtanje";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // destRadio
             // 
@@ -158,7 +211,7 @@
             this.generisiNo.Size = new System.Drawing.Size(47, 20);
             this.generisiNo.TabIndex = 14;
             this.generisiNo.Value = new decimal(new int[] {
-            10,
+            15,
             0,
             0,
             0});
@@ -220,6 +273,7 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.groupBox1.Controls.Add(this.djikstraRadio);
             this.groupBox1.Controls.Add(this.putButton);
             this.groupBox1.Controls.Add(this.dfsButton);
             this.groupBox1.Controls.Add(this.label2);
@@ -244,6 +298,7 @@
             // 
             this.dfsButton.AutoSize = true;
             this.dfsButton.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.dfsButton.ForeColor = System.Drawing.Color.Chocolate;
             this.dfsButton.Location = new System.Drawing.Point(7, 63);
             this.dfsButton.Name = "dfsButton";
             this.dfsButton.Size = new System.Drawing.Size(46, 17);
@@ -267,6 +322,7 @@
             this.bfsButton.AutoSize = true;
             this.bfsButton.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.bfsButton.Checked = true;
+            this.bfsButton.ForeColor = System.Drawing.Color.CornflowerBlue;
             this.bfsButton.Location = new System.Drawing.Point(6, 40);
             this.bfsButton.Name = "bfsButton";
             this.bfsButton.Size = new System.Drawing.Size(45, 17);
@@ -310,6 +366,18 @@
             this.poligonRadio.Text = "Poligon";
             this.poligonRadio.UseVisualStyleBackColor = false;
             // 
+            // djikstraRadio
+            // 
+            this.djikstraRadio.AutoSize = true;
+            this.djikstraRadio.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.djikstraRadio.ForeColor = System.Drawing.Color.LimeGreen;
+            this.djikstraRadio.Location = new System.Drawing.Point(7, 84);
+            this.djikstraRadio.Name = "djikstraRadio";
+            this.djikstraRadio.Size = new System.Drawing.Size(60, 17);
+            this.djikstraRadio.TabIndex = 11;
+            this.djikstraRadio.Text = "Djikstra";
+            this.djikstraRadio.UseVisualStyleBackColor = false;
+            // 
             // ProjectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -322,6 +390,8 @@
             this.screenPanel.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.velicinaNo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.generisiNo)).EndInit();
             this.groupBox2.ResumeLayout(false);
@@ -354,6 +424,12 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button putButton;
         private System.Windows.Forms.RadioButton destRadio;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.CheckBox graneBox;
+        private System.Windows.Forms.CheckBox vrhoviBox;
+        private System.Windows.Forms.Label label5;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.RadioButton djikstraRadio;
     }
 }
 
