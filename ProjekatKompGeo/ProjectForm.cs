@@ -30,6 +30,11 @@ namespace ProjekatKompGeo
         {
             if (poligonRadio.Checked)
             {
+                if (pocetakKraj.Count == 2)
+                {
+                    MessageBox.Show("Tačke destinacija su postavljene!");
+                    return;
+                }
                 Vektor2D tacka = new Vektor2D(e.X, e.Y);
                 tacke.Add(tacka);
                 tacka.DrawVektor(g);
@@ -45,6 +50,16 @@ namespace ProjekatKompGeo
             }
             if (destRadio.Checked)
             {
+                // Check if point is inside polygon
+                Vektor2D tackaPuta = new Vektor2D(e.X, e.Y);    
+                for (int i = 0; i < prepreke.Count; i++)
+                {
+                    if (prepreke[i].TackaUnutarPoligona(tackaPuta))
+                    {
+                        MessageBox.Show("Tacka je unutar poligona!");
+                        return;
+                    }
+                }
                 if (pocetakKraj.Count < 2)
                 {
                     Vektor2D tacka = new Vektor2D(e.X, e.Y);
@@ -83,6 +98,7 @@ namespace ProjekatKompGeo
             Dictionary<string, bool> postavke = new Dictionary<string, bool>();
             postavke["vrhovi"] = vrhoviBox.Checked;
             postavke["grane"] = graneBox.Checked;
+            postavke["dodatno"] = dodatnoBox.Checked;
 
             HelperFunkcije.TrapezoidnaDekompozicija(dimenzija, prepreke, g, ref mapaPuteva, postavke);
         }
@@ -99,29 +115,31 @@ namespace ProjekatKompGeo
         private void quadtreeButton_Click(object sender, EventArgs e)
         {
             Size d = screenPanel.Size;
+            Dictionary<string, bool> postavke = new Dictionary<string, bool>();
+            postavke["vrhovi"] = vrhoviBox.Checked;
+            postavke["grane"] = graneBox.Checked;
+            postavke["dodatno"] = dodatnoBox.Checked;
+
             HelperFunkcije.QuadTree(new List<Vektor2D> {
                  new Vektor2D(0,0), new Vektor2D(0,d.Height),
                  new Vektor2D(d.Width,d.Height), new Vektor2D(d.Width,0) },
-                 prepreke, g);
-            
-
+                 prepreke, g, postavke, ref mapaPuteva);     
         }
 
         private void nadjiPut_click(object sender, EventArgs e)
         {
+
             if (mapaPuteva == null || pocetakKraj.Count == 0)
                 return;
-
+            
             if (bfsButton.Checked)
             {
-                List<Vektor2D> sortiraneEkstenzijeTacke = mapaPuteva.SortiraneTackePuteva;
                 mapaPuteva.BFS(pocetakKraj[0], pocetakKraj[1], g);
                 return;
             }
 
             if (dfsButton.Checked)
             {
-                List<Vektor2D> sortiraneEkstenzijeTacke = mapaPuteva.SortiraneTackePuteva;
                 mapaPuteva.DFS(pocetakKraj[0], pocetakKraj[1], g);
                 return;
             }
@@ -132,11 +150,30 @@ namespace ProjekatKompGeo
                 return;
             }
 
+            if (astarRadio.Checked)
+            {
+                mapaPuteva.A_STAR(pocetakKraj[0], pocetakKraj[1], g);
+                return;
+            }
+
         }
 
         private void destRadio_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void bfsButton_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void reset_Click(object sender, EventArgs e)
+        {
+            g.Clear(Color.White);
+            prepreke.Clear();
+            pocetakKraj.Clear();
+            mapaPuteva = null;
         }
     }
 }

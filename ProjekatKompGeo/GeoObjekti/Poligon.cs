@@ -14,6 +14,7 @@ namespace ProjekatKompGeo.GeoObjekti
         readonly List<Segment> segmenti = new List<Segment>();
         readonly PointF[] tackeF;
         readonly Brush bojaPozadina;
+        public Vektor2D sredina { get; set; }
 
         public List<Vektor2D> getTacke()
         {
@@ -269,6 +270,17 @@ namespace ProjekatKompGeo.GeoObjekti
                 }
             }
             return unutar;
+        }
+
+        public bool Isti(Poligon B) {
+            if (this.getTacke().Count != B.getTacke().Count)
+                return false;
+            for (int i = 0; i < this.getTacke().Count; i++)
+            {
+                if (!this.getTacke()[i].Isti(B.getTacke()[i]))
+                    return false;
+            }
+            return true;
         }
     }
 }

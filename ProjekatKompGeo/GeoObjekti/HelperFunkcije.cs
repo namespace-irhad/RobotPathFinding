@@ -17,6 +17,7 @@ namespace ProjekatKompGeo.GeoObjekti
             List<Tuple<Segment, Vektor2D, int>> ekstenzije = new List<Tuple<Segment, Vektor2D, int>>();
             List<Segment> trapezSegmenti = new List<Segment>();
             List<Vektor2D> tackeEkstenzija = new List<Vektor2D>();
+            List<Poligon> prazneCelije = new List<Poligon>();
 
             for (int i = 0; i < prepreke.Count; i++)
             {
@@ -60,7 +61,8 @@ namespace ProjekatKompGeo.GeoObjekti
                         // tackaUdaljenosti.DrawVektor(g, new SolidBrush(Color.Yellow));
                         Segment segment = new Segment(tackaUdaljenosti, tackaOd);
                         trapezSegmenti.Add(segment);
-                        // segment.DrawSegment(g);
+                        if (postavke["dodatno"])
+                            segment.DrawSegment(g, Color.Chocolate);
                     }
                 }
             }
@@ -78,8 +80,9 @@ namespace ProjekatKompGeo.GeoObjekti
                 }
                 if (!sijeku)
                 {
-                    // ekstenzije[i].Item1.DrawSegment(g);
-                    trapezSegmenti.Add(ekstenzije[i].Item1);
+                    if (postavke["dodatno"])
+                        ekstenzije[i].Item1.DrawSegment(g, Color.Chocolate);
+                   trapezSegmenti.Add(ekstenzije[i].Item1);
                 }
             }
 
@@ -278,7 +281,7 @@ namespace ProjekatKompGeo.GeoObjekti
 
 
 
-        public static int ProvjeriCeliju(List<Vektor2D> celija, List<Poligon> prepreke)
+        public static int ProvjeriCeliju(List<Vektor2D> celija, List<Poligon> prepreke, List<Poligon> prazneCelije)
         {
             List<Segment> granice = new List<Segment> {
                 new Segment(celija[0], celija[1]), new Segment(celija[1], celija[2]),
@@ -315,13 +318,16 @@ namespace ProjekatKompGeo.GeoObjekti
                     }
                 }
             }
+            prazneCelije.Add(new Poligon(granice));
             return -1;
         }
-        public static void QuadTree(List<Vektor2D> regija, List<Poligon> prepreke, Graphics g)
+        public static void QuadTree(List<Vektor2D> regija, List<Poligon> prepreke, Graphics g, Dictionary<string, bool> postavke, ref Graf mapaPuteva)
         {
-            gr = g;
             Stack<List<Vektor2D>> celije = new Stack<List<Vektor2D>>();
+            List<Poligon> prazneCelije = new List<Poligon>();
+
             celije.Push(regija);
+            int regijaBr = 0;
 
             while (celije.Count > 0)
             {
@@ -331,34 +337,104 @@ namespace ProjekatKompGeo.GeoObjekti
                 Vektor2D v2 = regija[2];
                 Vektor2D v3 = regija[3];
 
-                if ((v1.Y - v0.Y) > 3)
+                if ((v1.Y - v0.Y) > 10) // Udaljenost izmedju, finoca celija
                 {
-
-                    new Segment(new Vektor2D((v3.X + v0.X) / 2, v0.Y), new Vektor2D((v3.X + v0.X) / 2, v1.Y)).DrawSegment(g);
-                    new Segment(new Vektor2D(v0.X, (v1.Y + v0.Y) / 2), new Vektor2D(v3.X, (v1.Y + v0.Y) / 2)).DrawSegment(g);
+                    if (postavke["grane"])
+                    {
+                        new Segment(new Vektor2D((v3.X + v0.X) / 2, v0.Y), new Vektor2D((v3.X + v0.X) / 2, v1.Y)).DrawSegment(g);
+                        new Segment(new Vektor2D(v0.X, (v1.Y + v0.Y) / 2), new Vektor2D(v3.X, (v1.Y + v0.Y) / 2)).DrawSegment(g);
+                    }
                     List<Vektor2D> celija0 = new List<Vektor2D>{
                         new Vektor2D(v0.X, v0.Y), new Vektor2D(v0.X, (v1.Y + v0.Y) / 2),
                         new Vektor2D((v3.X + v0.X) / 2, (v1.Y + v0.Y) / 2), new Vektor2D((v3.X + v0.X) / 2, v0.Y) };
                     // Debug.WriteLine(ProvjeriCeliju(celija0, prepreke));
-                    if (ProvjeriCeliju(celija0, prepreke) == 0)
-                        celije.Push(celija0);
+                    int rezultat = ProvjeriCeliju(celija0, prepreke, prazneCelije);
+                    if (rezultat == 0)
+                        celije.Push(celija0);    
                     List<Vektor2D> celija1 = new List<Vektor2D>{
                         new Vektor2D(v0.X, (v1.Y + v0.Y) / 2), new Vektor2D(v1.X, v1.Y),
                         new Vektor2D((v3.X + v0.X) / 2, v1.Y), new Vektor2D((v3.X + v0.X) / 2, (v1.Y + v0.Y) / 2) };
-                    if (ProvjeriCeliju(celija1, prepreke) == 0)
+                     rezultat = ProvjeriCeliju(celija1, prepreke, prazneCelije);
+                    if (rezultat == 0)
                         celije.Push(celija1);
                     List<Vektor2D> celija2 = new List<Vektor2D>{
                         new Vektor2D((v3.X + v0.X) / 2, (v1.Y + v0.Y) / 2), new Vektor2D((v3.X + v0.X) / 2, v1.Y),
                         new Vektor2D(v2.X,v2.Y), new Vektor2D(v3.X, (v1.Y + v0.Y) / 2) };
-                    if (ProvjeriCeliju(celija2, prepreke) == 0)
+                     rezultat = ProvjeriCeliju(celija2, prepreke, prazneCelije);
+                    if (rezultat == 0)
                         celije.Push(celija2);
                     List<Vektor2D> celija3 = new List<Vektor2D>{
                         new Vektor2D((v3.X + v0.X) / 2, v0.Y), new Vektor2D((v3.X + v0.X) / 2,(v1.Y + v0.Y) / 2),
                         new Vektor2D(v3.X,(v1.Y + v0.Y) / 2), new Vektor2D(v3.X,v3.Y) };
-                    if (ProvjeriCeliju(celija3, prepreke) == 0)
+                     rezultat = ProvjeriCeliju(celija3, prepreke, prazneCelije);
+                    if (rezultat == 0)
                         celije.Push(celija3);
                 }
             }
+
+            mapaPuteva = GenerisiQuadTreeGraf(prazneCelije, g, postavke, prepreke);
+
+            // mapaPuteva.printGrane();
+        }
+
+        public static Graf GenerisiQuadTreeGraf(List<Poligon> prazneCelije, Graphics g, Dictionary<string, bool> postavke, List<Poligon> prepreke) {
+            int brojacV = 0;
+            int granica = 200;
+            Graf noviGraf = new Graf(prazneCelije.Count);
+            Font font = new Font("Arial", 9, FontStyle.Regular, GraphicsUnit.Point);
+
+
+            foreach (Poligon celija in prazneCelije) {
+                // Dodavanje cvorova u graf i iscrtavanje celije
+                List<Segment> granice = new List<Segment> {
+                    new Segment(celija.getTacke()[0], celija.getTacke()[1]), new Segment(celija.getTacke()[1], celija.getTacke()[2]),
+                    new Segment(celija.getTacke()[2], celija.getTacke()[3]), new Segment(celija.getTacke()[3], celija.getTacke()[0]), };
+                Vektor2D sredina = new Vektor2D((celija.getTacke()[3].X + celija.getTacke()[0].X) / 2, (celija.getTacke()[1].Y + celija.getTacke()[0].Y) / 2);
+                // 
+                if (postavke["vrhovi"])
+                    sredina.DrawVektor(g);
+                sredina.SetV(brojacV);
+                if (postavke["vrhovi"])
+                    g.DrawString(sredina.V.ToString(), font, new SolidBrush(Color.Green), sredina.getPoint());
+                // noviGraf.AddNode(sredina);
+                prazneCelije[brojacV].sredina = sredina;
+
+                brojacV++;
+
+            }
+
+            // Povezivanje cvorova koji su na granici
+            foreach (Poligon celija in prazneCelije) {
+                Vektor2D sredina = celija.sredina;
+                foreach (Poligon celija2 in prazneCelije) {
+                    if (!celija.Isti(celija2)) {
+                        Vektor2D sredina2 = celija2.sredina;
+                        if (Vektor2D.getUdaljenost(sredina, sredina2) < granica) {
+                            // Check if edge is intersecting with any of the edges of the polygon
+                            bool intersect = false;
+                            foreach(Poligon prepreka in prepreke) {
+                                foreach (Segment granicaPrepreke in prepreka.getSegmenti()) {
+                                    if (granicaPrepreke.DaLiSeSegmentiSijeku(new Segment(sredina, sredina2))) {
+                                        intersect = true;
+                                        break;
+                                    }
+                                }
+                                if (intersect)
+                                    break;
+                            }
+                            if (!intersect) {
+                                noviGraf.AddEdge(sredina, sredina2);
+                                if (postavke["dodatno"])
+                                    new Segment(sredina, sredina2).DrawSegment(g);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+            return noviGraf;
         }
     }
 }
