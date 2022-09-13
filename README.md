@@ -8,6 +8,11 @@
 - I'm using shortest euclidean distance to connect the start, end nodes. For better results you would add these in the graph.
 - Project is written in Croatian/Bosnian/Serbian, all variables are set with that in mind.
 
+#### TODO
+- [ ] More efficient implementation (faster time complexity with sweep-line and radial sweep)
+- [ ] Check if the start/end can be directly linked before the path finding algorithms
+- [ ] Adjust how start/end are inserted (during the creation of the graph)
+
 #### Visibility graph
 ![graf_vidljivosti](https://user-images.githubusercontent.com/60628863/189530788-4c6b9fb1-9f55-43a9-9083-31cc7a195a53.png)
 #### Quadtree with all path algorithms
