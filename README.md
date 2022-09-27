@@ -8,6 +8,12 @@
 - I'm using shortest euclidean distance to connect the start, end nodes. For better results you would add these in the graph.
 - Project is written in Croatian/Bosnian/Serbian, all variables are set with that in mind.
 
+### Steps to run the program
+1. Generate obstacles (**Generisi**)
+2. Pick PF Algorithm (**QuadTree, Graf Vidljivosti, Trapez Dekom**)
+3. Add destinations (pick **Poc/Kraj** and set beginning and end with the **cursor**)
+4. Run BFS, DFS, Djikstra or AStar (Pick from the options and click **Nadji Put**)
+
 #### TODO
 - [ ] More efficient implementation (faster time complexity with sweep-line and radial sweep)
 - [ ] Check if the start/end can be directly linked before the path finding algorithms
